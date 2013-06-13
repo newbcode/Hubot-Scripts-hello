@@ -16,18 +16,18 @@ sub load {
 sub hello {
     my $msg = shift;
 
+    my @fonts = qw/banner block big bubble digital ivrit lean mini mnemonic
+        script shadow slant small smscript smshadow smslant standard term
+        letter mini mnemonic smascii12 smascii9/;
+
     my $user_input = $msg->match->[0];
 
-    $msg->http("http://translate.google.co.kr/#ko/en/$user_input")->get(
-        sub {
-            my ( $body, $hdr ) = @_;
-            
-            $msg->send($body);
-        }
-    );
+    my $num = int( rand(21) );
+
+    my $msg1 = `figlet -f $fonts[$num] $user_input`;
+    $msg->send("Font is $fonts[$num]!!!!!!!!!!!!");
+    $msg->send( split (/\n/, $msg1) );
 }
-
-
 
 1;
 
