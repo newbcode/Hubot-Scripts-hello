@@ -4,6 +4,7 @@ use utf8;
 use strict;
 use warnings;
 use Text::FIGlet;
+use Data::Printer;
 
 sub load {
     my ( $class, $robot ) = @_;
@@ -17,7 +18,7 @@ sub load {
         \&hello_list,
     );
     $robot->hear(
-        qr/^hello (-f) (.+)$/i,
+        qr/^hello -f (\w+) (.+)/i,
         \&hello_font,
     );
 
@@ -31,12 +32,15 @@ sub hello {
 
     my $user_input = $msg->match->[0];
 
+    if ($user_input =~ /-f/) {
+        return;
+    }
+
     my $num = int( rand(21) );
 
     my $font = Text::FIGlet->new(-d=>"./figlet", -f=>"$fonts[$num]");
     my $text = $font->figify(-A=>"$user_input");
     $msg->send( split (/\n/, $text) ) if $user_input ne 'list';
-    $msg->send( split (/\n/, $text) ) if $user_input ne '-f';
 }
 
 sub hello_list {
@@ -52,7 +56,8 @@ sub hello_list {
 sub hello_font {
     my $msg = shift;
 
-    my $user_input = $msg->match->[1];
+    my $user_font= $msg->match->[0];
+    my $user_input= $msg->match->[1];
 
     my $flag = 'off';
     my @fonts = qw/banner block big bubble digital ivrit lean mini mnemonic
@@ -61,14 +66,15 @@ sub hello_font {
     my $s_fonts = join ('/ ', @fonts);
 
     for my $font (@fonts) {
-        if ($font eq $user_input) {
-            my $font = Text::FIGlet->new(-d=>"./figlet", -f=>"$user_input");
+        if ($font eq $user_font) {
+            my $font = Text::FIGlet->new(-d=>"./figlet", -f=>"$user_font");
             my $text = $font->figify(-A=>"$user_input");
             $msg->send( split (/\n/, $text) ) if $user_input ne 'list';
             $flag = 'on';
         }
     }
-    $msg->send('List of available asciifonts - '. $s_fonts ) if $flag eq 'on';
+    $msg->send("Font($user_font) is not available ...") if $flag eq 'off';
+    $msg->send('List of available asciifonts - '. $s_fonts ) if $flag eq 'off';
 }
 1;
 
@@ -81,7 +87,7 @@ sub hello_font {
 =head1 SYNOPSIS
 
     hello <text> - Random text show in ascii
-    hello - list - Ascii Fonts List
+    hello list - Ascii Fonts List
     hello -f <text> - Select Ascii Font to Show.  
  
 =head1 AUTHOR
