@@ -4,9 +4,11 @@ Hubot::Scripts:hello
 
 ## SYNOPSIS ##
 
+```perl
 - hello <text> - Random text show in ascii
 - hello list - Ascii Fonts List
 - hello -f <text> - Select Ascii Font to Show. 
+```
 
 ## DESCRIPTION ##
 
